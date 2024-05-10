@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--    부트스트랩 반응형-->
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <!--    부트스트랩 CSS-->
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">등록을 위해 여기에 엑셀 파일을 드래그를 진행하는걸 진행하도록 햇!!!</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <div class="drop-area" id="drop-area">
+                        <p class="text-center">여따 햇!!!</p>
+                        <input accept=".xlsx" id="fileElem" style="display:none;" type="file">
+                    </div>
+                    <div id="fileInfo"></div>
+                    <button class="btn btn-success mt-3" id="uploadBtn" style="display:none;">Upload Files</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<!--제이쿼리-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<!--부트스트랩 js-->
+<script crossorigin="anonymous"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        const dropArea = $('.card');
+        const fileInfo = $('#fileInfo');
+        const uploadBtn = $('#uploadBtn');
+        const fileElem = $('#fileElem');
+
+        dropArea.on('dragenter dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('highlight');
+        });
+
+        dropArea.on('dragleave drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('highlight');
+        });
+
+        dropArea.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let files = e.originalEvent.dataTransfer.files;
+            fileElem[0].files = files;
+            handleFiles(files);
+            uploadBtn.show(); // 파일이 드롭되면 버튼 표시
+        });
+
+        $('#fileElem').on('change', function(e) {
+            let files = $(this)[0].files;
+            handleFiles(files);
+            uploadBtn.show(); // 파일이 선택되면 버튼 표시
+        });
+
+        function handleFiles(files) {
+            fileInfo.empty(); // 파일 정보 초기화
+
+            if (files.length === 0) {
+                return; // 파일이 선택되지 않았을 경우 처리 중단
+            }
+
+            $.each(files, function(index, file) {
+                displayFileInfo(file);
+            });
+        }
+
+        function displayFileInfo(file) {
+            const fileSize = formatBytes(file.size);
+            const fileInfoString = `${file.name} (${fileSize})`;
+            fileInfo.append(`<div>${fileInfoString}</div>`);
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        uploadBtn.on('click', function() {
+            const files = fileElem[0].files;
+            var form = new FormData();
+            form.append("excel",files[0]);
+            $('.card-body').append('<div class="d-flex justify-content-center"><div class="spinner-border custom-spinner" role="status"><span>이악물고 기다렷!</span></div></div>');
+            $('head').append('<style>.custom-spinner { width: 100px; height: 100px; }</style>');
+            $.ajax({
+                url: '/excel',
+                type: 'POST',
+                data: form,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Files uploaded successfully:', response);
+
+                    // 파일 업로드가 완료되면 알림 창을 표시합니다.
+                    alert('오빠 술 잘마신다~ 쭉쭊쭉 업로드 성공!');
+                    $('.card-body').html('<p class="text-center fs-4">뒤로 가기를 진행하도록 햇!!!</p>');
+
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error uploading files:', error);
+
+                    // 파일 업로드 중 에러가 발생하면 알림 창을 표시합니다.
+                    alert('씨이빨, 오빠, 오빠 큰일났어! 오빠 정신 차려! 업로드 실패했어!');
+                }
+            });
+        });
+    });
+</script>
+</html>

@@ -11,4 +11,5 @@ public interface DayService extends CrudService<DayCreateDTO, DayReadDTO, DayUpd
 
     boolean isDay(Long day, Book book);
     Day findId(Long day, Book book);
+
 }

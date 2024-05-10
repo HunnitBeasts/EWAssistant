@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 부트스트랩 반응형 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 부트스트랩 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<h2 class="text-center" id="text1">시험 볼 책과 DAY를 고르도록 햇!!!</h2>
+<div class="accordion" id="accordionExample">
+    <!-- 아코디언 아이템 -->
+    <!-- 받아온 데이터를 기반으로 아코디언 아이템을 동적으로 생성합니다 -->
+</div>
+<h2 class="text-center" id="text2">맻문제를 시험볼지 고르도록 햇!!!</h2>
+<div class="row g-3" id="count">
+    <div class="col-md-6">
+        <label for="testCount" class="visually-hidden">answer</label>
+        <input type="text" class="form-control" id="testCount" placeholder="맻 문제짜리 시험지를 만들갓?">
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-primary mb-3" id="createTestBtn">만들어 보리기</button>
+    </div>
+</div>
+<h2 class="text-center">시험지를 풀도록 해잇!!!</h2>
+<div id="wordTable" class="mx-auto col-8"></div>
+<h2 class="text-center">얼마나 틀렸는지 보도록 해잇!!!</h2>
+<div id="gradingTable" class="mx-auto col-8"></div>
+
+<!-- 제이쿼리 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+       $.ajax({
+           url: '/all-book-and-days',
+           type: 'GET',
+           success: function(response) {
+               var accordionHTML = '';
+               var groupIndex = 1;
+               var bookGroups = groupBooksByBookName(response.bookWithDaysDTOS);
+               bookGroups.forEach(function(group) {
+                   accordionHTML += `
+                       <div class="accordion-item">
+                           <h2 class="accordion-header" id="heading${groupIndex}">
+                               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${groupIndex}" aria-expanded="true" aria-controls="collapse${groupIndex}">
+                                   ${group[0].bookName}
+                               </button>
+                           </h2>
+                           <div id="collapse${groupIndex}" class="accordion-collapse collapse" aria-labelledby="heading${groupIndex}" data-bs-parent="#accordionExample">
+                               <div class="accordion-body">
+                                   <div class="container">
+                                       <div class="row">
+                                           ${generateCheckboxesHTML(group)}
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   `;
+                   groupIndex++;
+               });
+               $('#accordionExample').html(accordionHTML);
+           },
+           error: function(xhr, status, error) {
+               console.error('Error fetching data:', error);
+           }
+       });
+
+       $('#createTestBtn').click(function() {
+           var selectedBooks = [];
+           $('input[type="checkbox"]:checked').each(function() {
+               var bookName = $(this).val();
+               var days = $(this).data('days');
+               selectedBooks.push({
+                   book: bookName,
+                   days: days
+               });
+           });
+           var testCount = $('#testCount').val();
+
+           var dto = {
+               dtos: selectedBooks,
+               count: testCount
+           };
+
+$.ajax({
+    url: '/create-test',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(dto),
+    success: function(response) {
+        var tableHTML = '<table class="table"><tbody>';
+        for (var i = 0; i < response.length; i++) {
+            if (i % 2 === 0) {
+                tableHTML += '<tr>';
+            }
+            tableHTML += '<td><p>' + response[i].word + '</p></td>';
+            tableHTML += '<td><input type="text" class="form-control" placeholder="뜻을 입력햇"></td>';
+            if (i % 2 !== 0 || i === response.length - 1) {
+                tableHTML += '</tr>';
+            }
+        }
+        tableHTML += '</tbody></table>';
+        $('#wordTable').html(tableHTML);
+
+        // 요소들을 삭제합니다.
+        $('#text1, #text2, #count, #accordionExample').remove();
+
+        // 채점하기 버튼을 추가합니다.
+        var checkBtnHTML = '<div class="text-center"><button type="button" class="btn btn-success" id="checkBtn">채점하기</button></div>';
+        $('#wordTable').append(checkBtnHTML);
+    },
+    error: function(xhr, status, error) {
+        console.error('Error creating test:', error);
+    }
+});
+
+// 채점하기 버튼 클릭 이벤트 핸들러
+$(document).on('click', '#checkBtn', function() {
+    // 채점 로직을 여기에 추가하세요.
+    alert('채점하기 버튼을 클릭하셨습니다.');
+});
+
+
+
+       });
+   });
+
+   function groupBooksByBookName(books) {
+       var groups = {};
+       books.forEach(function(book) {
+           if (!groups[book.bookName]) {
+               groups[book.bookName] = [];
+           }
+           groups[book.bookName].push(book);
+       });
+       return Object.values(groups);
+   }
+
+   function generateCheckboxesHTML(books) {
+       var checkboxesHTML = '';
+       var rowCounter = 0;
+       books.forEach(function(book, index) {
+           if (index % 5 === 0) {
+               checkboxesHTML += '</div><div class="row">';
+           }
+           checkboxesHTML += `
+               <div class="col">
+                   <div class="form-check">
+                       <input class="form-check-input" type="checkbox" id="${book.bookName}${index}" value="${book.bookName}" data-days="${book.days}">
+                       <label class="form-check-label" for="${book.bookName}${index}">
+                           ${book.bookName} (${book.days} 일)
+                       </label>
+                   </div>
+               </div>
+           `;
+           rowCounter++;
+       });
+       checkboxesHTML += '</div>';
+       return checkboxesHTML;
+   }
+</script>
+
+<!-- 부트스트랩 js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

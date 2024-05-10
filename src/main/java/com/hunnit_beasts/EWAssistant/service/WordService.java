@@ -9,7 +9,5 @@ import java.util.List;
 
 public interface WordService extends CrudService<WordCreateDTO, WordReadDTO, WordUpdateDTO, Long> {
     List<WordDataDTO> readWordData(List<SelectedDTO> dtos);
-    List<WordQuestionDTO> createQuestion(List<SelectedDTO> dtos, Integer count);
     List<WordDataDTO> readWords(List<WordSubmitDTO> dtos);
-    List<WordGradingDTO> grading(List<WordSubmitDTO> dtos);
 }

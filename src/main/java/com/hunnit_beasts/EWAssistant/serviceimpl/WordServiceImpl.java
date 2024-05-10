@@ -55,60 +55,8 @@ public class WordServiceImpl implements WordService {
     }
 
     @Override
-    public List<WordQuestionDTO> createQuestion(List<SelectedDTO> dtos, Integer count) {
-        List<WordQuestionDTO> questions = wordQueryDslRepository.findIdAndWordByBookAndDays(dtos);
-        return selectRandomQuestions(questions, count);
-    }
-
-    @Override
     public List<WordDataDTO> readWords(List<WordSubmitDTO> dtos) {
         return wordQueryDslRepository.findAllByIds(dtos);
     }
 
-    @Override
-    public List<WordGradingDTO> grading(List<WordSubmitDTO> dtos) {
-        List<WordDataDTO> answers = readWords(dtos);
-        return gradeAnswers(dtos, answers);
-    }
-
-    private List<WordQuestionDTO> selectRandomQuestions(List<WordQuestionDTO> questions, Integer count) {
-        int[] randomIndices = generateRandomIndices(count, questions.size());
-        List<WordQuestionDTO> result = new ArrayList<>();
-        for (int index : randomIndices)
-            result.add(questions.get(index));
-        return result;
-    }
-
-    private int[] generateRandomIndices(int length, int max) {
-        int[] indices = new int[length];
-        Random random = new Random();
-        Set<Integer> set = new HashSet<>();
-        for (int i = 0; i < length; i++) {
-            int randomNumber;
-            do {
-                randomNumber = random.nextInt(max);
-            } while (set.contains(randomNumber));
-            indices[i] = randomNumber;
-            set.add(randomNumber);
-        }
-        return indices;
-    }
-
-    private List<WordGradingDTO> gradeAnswers(List<WordSubmitDTO> dtos, List<WordDataDTO> answers) {
-        List<WordGradingDTO> result = new ArrayList<>();
-        for (int i = 0; i < dtos.size(); i++) {
-            WordSubmitDTO submitDTO = dtos.get(i);
-            WordDataDTO answerDTO = answers.get(i);
-            boolean isCorrect = isAnswerCorrect(submitDTO.getMeaning(), answerDTO.getMeaning());
-            result.add(answerDTO.DataDTOToGradingDTO(isCorrect, submitDTO.getMeaning()));
-        }
-        return result;
-    }
-
-    private boolean isAnswerCorrect(String yourAnswer, String correctAnswer) {
-        if (yourAnswer == null || yourAnswer.isEmpty())
-            return false;
-        else
-            return correctAnswer.contains(yourAnswer);
-    }
 }

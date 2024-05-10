@@ -6,6 +6,7 @@ import com.hunnit_beasts.EWAssistant.dto.word.WordGradingDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordQuestionDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordSubmitDTO;
 import com.hunnit_beasts.EWAssistant.service.ExcelReadService;
+import com.hunnit_beasts.EWAssistant.service.QuestionService;
 import com.hunnit_beasts.EWAssistant.service.WordService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 @SpringBootTest
 @Transactional
@@ -35,12 +35,14 @@ import java.util.Scanner;
 public class ExcelReadTest {
 
     private final WordService wordService;
+    private final QuestionService questionService;
     private final ExcelReadService excelReadService;
     private MultipartFile multipartFile;
 
     @Autowired
-    public ExcelReadTest(WordService wordService, ExcelReadService excelReadService) {
+    public ExcelReadTest(WordService wordService, QuestionService questionService, ExcelReadService excelReadService) {
         this.wordService = wordService;
+        this.questionService = questionService;
         this.excelReadService = excelReadService;
     }
 
@@ -106,7 +108,7 @@ public class ExcelReadTest {
         dtos.add(new SelectedDTO("기모딱한 단어장",9L));
         dtos.add(new SelectedDTO("기모딱한 단어장",23L));
 
-        List<WordQuestionDTO> result = wordService.createQuestion(dtos,50);
+        List<WordQuestionDTO> result = questionService.createQuestion(dtos,50);
         for (WordQuestionDTO dto : result)
             System.out.println(dto.toString());
     }
@@ -123,7 +125,7 @@ public class ExcelReadTest {
         dtos.add(new SelectedDTO("기모딱한 단어장",7L));
         dtos.add(new SelectedDTO("기모딱한 단어장",3L));
 
-        List<WordQuestionDTO> result = wordService.createQuestion(dtos,50);
+        List<WordQuestionDTO> result = questionService.createQuestion(dtos,50);
         List<WordSubmitDTO> submits = new ArrayList<>();
         for (WordQuestionDTO dto : result)
             submits.add(new WordSubmitDTO(dto.getId(),dto.getWord()));
@@ -149,13 +151,13 @@ public class ExcelReadTest {
         dtos.add(new SelectedDTO("기모딱한 단어장",11L));
         dtos.add(new SelectedDTO("기모딱한 단어장",15L));
 
-        List<WordQuestionDTO> result = wordService.createQuestion(dtos,5);
+        List<WordQuestionDTO> result = questionService.createQuestion(dtos,5);
         List<WordSubmitDTO> submits = new ArrayList<>();
         for (int j = 0; j < result.size(); j++) {
             String meaning = result.get(j).getWord().replace("text","테스트");
             submits.add(new WordSubmitDTO(result.get(j).getId(),meaning));
         }
-        List<WordGradingDTO> wordDataDTOS = wordService.grading(submits);
+        List<WordGradingDTO> wordDataDTOS = questionService.grading(submits);
 
         for (int i = 0; i < submits.size(); i++) {
             System.out.println(result.get(i));

@@ -8,16 +8,12 @@ import com.hunnit_beasts.EWAssistant.entity.QBook;
 import com.hunnit_beasts.EWAssistant.entity.QDay;
 import com.hunnit_beasts.EWAssistant.entity.QWord;
 import com.hunnit_beasts.EWAssistant.repository.querydsl.WordQueryDslRepository;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -43,6 +39,7 @@ public class WordQueryDslRepositoryImpl implements WordQueryDslRepository {
                 .join(book.days, day)
                 .join(day.words, word)
                 .where(buildConditions(dtoList, book, day))
+                .orderBy(book.id.asc())
                 .fetch();
     }
 
