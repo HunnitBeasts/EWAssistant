@@ -6,6 +6,6 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class WordSubmitDTO {
-    private final Long id;
+    private final Long wordId;
     private final String meaning;
 }

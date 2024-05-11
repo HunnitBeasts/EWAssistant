@@ -7,6 +7,7 @@ public enum ErrorCode {
 
     TEMPORARY_SERVER_ERROR(500,"A000","세부타입이 정해지지 않은 일반 에러입니다. 곧 수정하겠습니다."),
     NO_DATA_ERROR(500,"E001","[ERROR] 요청 데이터가 존재하지 않습니다."),
+    OVER_COUNT_ERROR(500,"E001","[ERROR] 단어 수보다 문제 수가 많습니다."),
     ;
 
     private final int status;

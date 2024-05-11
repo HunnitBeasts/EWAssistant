@@ -7,17 +7,20 @@ import com.hunnit_beasts.EWAssistant.dto.with.WordDataDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordGradingDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordQuestionDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordSubmitDTO;
+import com.hunnit_beasts.EWAssistant.enums.ErrorCode;
 import com.hunnit_beasts.EWAssistant.repository.querydsl.DayQueryDslRepository;
 import com.hunnit_beasts.EWAssistant.repository.querydsl.WordQueryDslRepository;
 import com.hunnit_beasts.EWAssistant.service.QuestionService;
 import com.hunnit_beasts.EWAssistant.service.WordService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class QuestionServiceImpl implements QuestionService {
 
     private final DayQueryDslRepository dayQueryDslRepository;
@@ -35,6 +38,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public List<WordQuestionDTO> createQuestion(List<SelectedDTO> dtos, Integer count) {
         List<WordQuestionDTO> questions = wordQueryDslRepository.findIdAndWordByBookAndDays(dtos);
+        if(questions.size() < count)
+            throw  new IllegalArgumentException(ErrorCode.OVER_COUNT_ERROR.getMessage());
         return selectRandomQuestions(questions, count);
     }
     @Override
@@ -55,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private boolean isAnswerCorrect(String yourAnswer, String correctAnswer) {
-        if (yourAnswer == null || yourAnswer.isEmpty())
+        if (yourAnswer.isEmpty())
             return false;
         else
             return correctAnswer.contains(yourAnswer);

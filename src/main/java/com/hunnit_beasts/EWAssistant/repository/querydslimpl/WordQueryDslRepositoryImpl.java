@@ -64,7 +64,7 @@ public class WordQueryDslRepositoryImpl implements WordQueryDslRepository {
         QWord word = QWord.word1;
 
         List<Long> ids = dtos.stream()
-                .map(WordSubmitDTO::getId)
+                .map(WordSubmitDTO::getWordId)
                 .collect(Collectors.toList());
 
         Map<Long, Integer> idIndexMap = generateIdIndexMap(ids);

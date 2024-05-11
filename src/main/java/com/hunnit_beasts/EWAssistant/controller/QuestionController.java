@@ -2,6 +2,7 @@ package com.hunnit_beasts.EWAssistant.controller;
 
 import com.hunnit_beasts.EWAssistant.dto.question.QuestionBookAndDaysDTO;
 import com.hunnit_beasts.EWAssistant.dto.question.QuestionCreateDTO;
+import com.hunnit_beasts.EWAssistant.dto.question.QuestionSubmitDTO;
 import com.hunnit_beasts.EWAssistant.dto.with.SelectedDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordGradingDTO;
 import com.hunnit_beasts.EWAssistant.dto.word.WordQuestionDTO;
@@ -34,8 +35,8 @@ public class QuestionController {
     }
 
     @PostMapping("test-grading")
-    public ResponseEntity<List<WordGradingDTO>> grading(@RequestBody List<WordSubmitDTO> dto){
-        return new ResponseEntity<>(questionService.grading(dto), HttpStatus.OK);
+    public ResponseEntity<List<WordGradingDTO>> grading(@RequestBody QuestionSubmitDTO dto){
+        return new ResponseEntity<>(questionService.grading(dto.getSubmitList()), HttpStatus.OK);
     }
 
 
